@@ -38,6 +38,7 @@ oled.scroll(20, 0)                   # scroll 20 pixels to the right
 +++++++ USEFUL DATA +++++++
 
      ←--------------- 128px ---------------→
+
  ↑   #######################################
  |   #######################################
  |   #######################################
@@ -46,15 +47,88 @@ oled.scroll(20, 0)                   # scroll 20 pixels to the right
  |   #######################################
  ↓   #######################################
 
+how many vertical characters : 8
+ \_ horizontal : 16
 
 """
 
+# librairies
 from machine import Pin, I2C
 from picobricks import SSD1306_I2C
+import time
 
+# pin initialization
 i2c = I2C(0, scl=Pin(5), sda=Pin(4))
 oled = SSD1306_I2C(128, 64, i2c, addr=0x3C)
 
+# vars
+HORIZ_LENGHT = 128
+VERT_LENGHT = 64
+CHARA_SIZE_Y = 7 # vertical lenght of a character
+CHARA_SIZE_X = 7 # horizontal lenght of a character
+NB_COL = 16 # how many colones are there : 1, 2, ...
+NB_LINES = 8 # how many lines are there : 1, 2, ...
+
+def make_droplet(line, col, lenght):
+    y = int(col * (HORIZ_LENGHT / NB_COL)) # determinate y coord of chosen col
+    x = line # begin at 0
+    for i in range(lenght):
+        write_chara("1", x, y)
+        y = y + 1 + CHARA_SIZE_Y
+        update_screen()
+
+        time.sleep(0.5)
+
+    # where we will remove a chara
+    y1 = int(col * (HORIZ_LENGHT / NB_COL))
+    x1 = line
+    # where we will write a new chara
+    y2 = int(lenght * (HORIZ_LENGHT / NB_COL))
+    x2 = line
+    for i in range(NB_COL):
+        oled.fill_rect(x1, y1, 8, 8, 1)
+        y1 = y1 + 1 + CHARA_SIZE_Y
+        print("y1 ", y1)
+        write_chara("1", x2, y2)
+        y2 = y2 + 1 + CHARA_SIZE_Y
+        print("y2 ", y2)
+        time.sleep(1)
+
+def update_droplets():
+    pass
+
+def write_chara(text, line, col):
+    oled.text(text, line, col)
+
+def update_screen():
+    oled.show()
 
 
-oled.show()
+make_droplet(0, 1, 2)
+
+update_screen()
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
