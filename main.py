@@ -83,16 +83,17 @@ def make_droplet(line, col, lenght):
     y1 = int(col * (HORIZ_LENGHT / NB_COL))
     x1 = line
     # where we will write a new chara
-    y2 = int(lenght * (HORIZ_LENGHT / NB_COL))
-    x2 = line
+    y2 = int(lenght * (HORIZ_LENGHT / NB_COL)) + 1 + CHARA_SIZE_Y
+    x2 = line 
     for i in range(NB_COL):
-        oled.fill_rect(x1, y1, 8, 8, 1)
-        y1 = y1 + 1 + CHARA_SIZE_Y
-        print("y1 ", y1)
         write_chara("1", x2, y2)
         y2 = y2 + 1 + CHARA_SIZE_Y
         print("y2 ", y2)
-        time.sleep(1)
+        oled.fill_rect(x1, y1, 8, 8, 0)
+        y1 = y1 + 1 + CHARA_SIZE_Y
+        print("y1 ", y1)
+        update_screen()
+        time.sleep(0.5)
 
 def update_droplets():
     pass
@@ -104,7 +105,7 @@ def update_screen():
     oled.show()
 
 
-make_droplet(0, 1, 2)
+make_droplet(0, 1, 6)
 
 update_screen()
 #
