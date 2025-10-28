@@ -55,81 +55,57 @@ how many vertical characters : 8
 # librairies
 from machine import Pin, I2C
 from picobricks import SSD1306_I2C
-import time
+import time, random
 
-# pin initialization
+# pins
 i2c = I2C(0, scl=Pin(5), sda=Pin(4))
 oled = SSD1306_I2C(128, 64, i2c, addr=0x3C)
 
-# vars
-HORIZ_LENGHT = 128
-VERT_LENGHT = 64
-CHARA_SIZE_Y = 7 # vertical lenght of a character
-CHARA_SIZE_X = 7 # horizontal lenght of a character
-NB_COL = 16 # how many colones are there : 1, 2, ...
-NB_LINES = 8 # how many lines are there : 1, 2, ...
+# const vars
+WIDTH = 128
+HEIGHT = 64
+CHAR_WIDTH = 8
+CHAR_HEIGHT = 8
+COLS = WIDTH // CHAR_WIDTH
+# may influence fps and drops's spe
+UPDATE_DELAY = 0.05
 
-def make_droplet(line, col, lenght):
-    y = int(col * (HORIZ_LENGHT / NB_COL)) # determinate y coord of chosen col
-    x = line # begin at 0
-    for i in range(lenght):
-        write_chara("1", x, y)
-        y = y + 1 + CHARA_SIZE_Y
-        update_screen()
+# we'll pick random value between these int to determinate current drop lenght
+DROPS_MIN_LENGHT = 1
+DROPS_MAX_LENGHT = 5
 
-        time.sleep(0.5)
+# drops is a list that contains every vertical positions of every droplets
+# vertical position can vary from 0 to 63 (since height is 64)
+drops = [random.randint(0, HEIGHT - 1) for _ in range(COLS)] 
 
-    # where we will remove a chara
-    y1 = int(col * (HORIZ_LENGHT / NB_COL))
-    x1 = line
-    # where we will write a new chara
-    y2 = int(lenght * (HORIZ_LENGHT / NB_COL)) + 1 + CHARA_SIZE_Y
-    x2 = line 
-    for i in range(NB_COL):
-        write_chara("1", x2, y2)
-        y2 = y2 + 1 + CHARA_SIZE_Y
-        print("y2 ", y2)
-        oled.fill_rect(x1, y1, 8, 8, 0)
-        y1 = y1 + 1 + CHARA_SIZE_Y
-        print("y1 ", y1)
-        update_screen()
-        time.sleep(0.5)
+# head and tail have different character sets
+head_chars = ["*"]
+tail_chars = list("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*(){}[];:/?\|+<>")
 
-def update_droplets():
-    pass
+while True:
+    # clear the screen
+    oled.fill(0)
 
-def write_chara(text, line, col):
-    oled.text(text, line, col)
+    for i in range(COLS):
+        # get horizontal position of cols, depends on CHAR_WIDTH
+        x = i * CHAR_WIDTH
+        # get vertical position of current drop stored in drops[]
+        y = drops[i] * CHAR_HEIGHT
+        
+        # show head
+        oled.text(random.choice(head_chars), x, y)
 
-def update_screen():
+        # increase current drop's lenght
+        drops[i] += 1
+
+        # if current drop touches edge of the screen
+        if drops[i] * CHAR_HEIGHT > (HEIGHT + DROPS_MAX_LENGHT * CHAR_HEIGHT):
+            # reset current drop, multiple of CHAR_HEIGHT
+            drops[i] = n = random.randint(0, 4) * CHAR_HEIGHT
+
+
+    # finally show result by updating screen
     oled.show()
-
-
-make_droplet(0, 1, 6)
-
-update_screen()
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    time.sleep(UPDATE_DELAY)
 
 
